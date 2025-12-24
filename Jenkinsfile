@@ -186,16 +186,19 @@ pipeline {
                     // -r zap_report.html \
                     
                     try {
+                        sh "mkdir -p $WORKSPACE/zap-wrk && chmod 777 $WORKSPACE/zap-wrk"
+
                         sh """
                         docker run --rm \
-                        -v $WORKSPACE:/zap/wrk:rw \
+                        -v $WORKSPACE/zap-wrk:/zap/wrk:rw \
                         --network host \
                         -u 1002:1002 \
                         -e ZAP_HOME=/zap/wrk \
                         zaproxy/zap-stable \
                         zap-baseline.py \
-                        -t http://localhost:9000 \
+                        -t http://localhost:${ZAP_PORT} \
                         -r /zap/wrk/zap_report.html \
+                        -g /zap/wrk/zap.yaml \
                         || true 
                         """
                         // || true prevents pipeline failure if vulnerabilities are found (typical for Baseline scans)
